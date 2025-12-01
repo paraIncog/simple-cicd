@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <title>Simple Docker + Jenkins App</title>
+</head>
+<body>
+  <h1>Frontend</h1>
+  <button id="btn">Call backend</button>
+  <pre id="output"></pre>
+
+  <script>
+    document.getElementById("btn").addEventListener("click", () => {
+      fetch("/api/hello")
+        .then(res => res.json())
+        .then(data => {
+          document.getElementById("output").textContent = JSON.stringify(data, null, 2);
+        })
+        .catch(err => {
+          document.getElementById("output").textContent = "Error: " + err;
+        });
+    });
+  </script>
+</body>
+</html>
