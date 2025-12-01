@@ -2,7 +2,6 @@ pipeline {
     agent any
 
     environment {
-        // Optional tagging if you later push images to a registry
         IMAGE_TAG = "latest"
     }
 
@@ -16,8 +15,12 @@ pipeline {
         stage('Backend: Install & Test') {
             steps {
                 dir('backend') {
-                    sh 'npm install'
-                    sh 'npm test'
+                    script {
+                        docker.image('node:20-alpine').inside {
+                            sh 'npm install'
+                            sh 'npm test'
+                        }
+                    }
                 }
             }
         }
@@ -28,15 +31,10 @@ pipeline {
             }
         }
 
-        stage('Run Containers (Smoke Test)') {
+        stage('Run Containers (Smoke Test))') {
             steps {
-                // Start in detached mode
                 sh 'docker compose up -d'
-
-                // Simple wait for services to come up
                 sh 'sleep 15'
-
-                // Basic health check on backend
                 sh 'curl -f http://localhost:8080/api/hello || (echo "Health check failed" && exit 1)'
             }
         }
@@ -44,7 +42,6 @@ pipeline {
 
     post {
         always {
-            // Clean up containers after pipeline finishes
             sh 'docker compose down || true'
         }
     }
